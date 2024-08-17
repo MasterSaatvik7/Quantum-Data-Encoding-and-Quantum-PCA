@@ -1,0 +1,6 @@
+python 3.11.9
+Flask 3.0.3
+numpy 1.26.4
+pandas 2.2.2
+qiskit 1.1.2
+qiskit-machine-learning 0.7.2

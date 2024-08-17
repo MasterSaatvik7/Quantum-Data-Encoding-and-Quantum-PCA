@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum CSV Operations</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #1e1e2f;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #f0f4f8; /* Light background for contrast */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            color: #333; /* Dark text for readability */
+        }
+        h1, h3 {
+            color: #007BFF;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+            color: #555;
+        }
+        input[type="file"],
+        input[type="checkbox"],
+        input[type="radio"],
+        button {
+            margin: 10px 0;
+            background-color: #e3e7ed;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        input[type="file"] {
+            padding: 8px;
+        }
+        #columns-to-drop {
+            margin-top: 20px;
+            background: #ffffff; /* Even lighter background inside the form */
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        #angle-sub-options {
+            margin-left: 20px;
+        }
+        button {
+            background-color: #007BFF;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            color: #fff;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script>
+        function toggleSubOptions() {
+            var angleEncodingChecked = document.getElementById('operation2').checked;
+            var subOptions = document.getElementById('angle-sub-options');
+            subOptions.style.display = angleEncodingChecked ? 'block' : 'none';
+        }
+
+        function fetchColumns() {
+            var fileInput = document.getElementById('file');
+            if (fileInput.files.length > 0) {
+                var formData = new FormData();
+                formData.append("file", fileInput.files[0]);
+
+                fetch('/get_columns', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var columnsDiv = document.getElementById('columns-to-drop');
+                    columnsDiv.innerHTML = '';  // Clear any previous checkboxes
+
+                    var title = document.createElement('h3');
+                    title.textContent = 'Select Columns to Drop:';
+                    columnsDiv.appendChild(title);
+
+                    data.columns.forEach(column => {
+                        var checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.name = 'columns_to_drop';
+                        checkbox.value = column;
+                        columnsDiv.appendChild(checkbox);
+
+                        var label = document.createElement('label');
+                        label.htmlFor = column;
+                        label.appendChild(document.createTextNode(column));
+                        columnsDiv.appendChild(label);
+
+                        columnsDiv.appendChild(document.createElement('br'));
+                    });
+
+                    columnsDiv.style.display = 'block';
+                })
+                .catch(error => console.error('Error fetching columns:', error));
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Quantum CSV Operations</h1>
+
+        <form action="/process" method="post" enctype="multipart/form-data">
+            <label for="file">Choose CSV file:</label>
+            <input type="file" id="file" name="file" required onchange="fetchColumns()"><br>
+
+            <div id="columns-to-drop" style="display:none;">
+                <h3>Select Columns to Drop:</h3>
+                <!-- Checkboxes will be dynamically added here -->
+            </div>
+
+            <h3><label for="operations">Select Operations:</label></h3>
+            <input type="checkbox" id="operation1" name="operations" value="Amplitude Encoding">
+            <label for="operation1">Amplitude Encoding</label><br>
+
+            <input type="checkbox" id="operation2" name="operations" value="Angle Encoding" onclick="toggleSubOptions()">
+            <label for="operation2">Angle Encoding</label><br>
+
+            <div id="angle-sub-options" style="display:none;">
+                <input type="radio" id="rx" name="angle_option" value="Rx">
+                <label for="rx">Rx</label><br>
+                <input type="radio" id="ry" name="angle_option" value="Ry">
+                <label for="ry">Ry</label><br>
+                <input type="radio" id="rz" name="angle_option" value="Rz">
+                <label for="rz">Rz</label><br>
+            </div>
+
+            <br><button type="submit">Process CSV</button>
+        </form>
+
+        <br><br>
+        <a href="/pca">Go to Quantum PCA</a> 
+    </div>
+</body>
+</html>
